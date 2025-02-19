@@ -1,0 +1,53 @@
+
+def translate_dna(dna_sequence):
+    codon_table = {
+        'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
+        'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
+        'AAC':'N', 'AAT':'N', 'AAA':'K', 'AAG':'K',
+        'AGC':'S', 'AGT':'S', 'AGA':'R', 'AGG':'R',
+        'CTA':'L', 'CTC':'L', 'CTG':'L', 'CTT':'L',
+        'CCA':'P', 'CCC':'P', 'CCG':'P', 'CCT':'P',
+        'CAC':'H', 'CAT':'H', 'CAA':'Q', 'CAG':'Q',
+        'CGA':'R', 'CGC':'R', 'CGG':'R', 'CGT':'R',
+        'GTA':'V', 'GTC':'V', 'GTG':'V', 'GTT':'V',
+        'GCA':'A', 'GCC':'A', 'GCG':'A', 'GCT':'A',
+        'GAC':'D', 'GAT':'D', 'GAA':'E', 'GAG':'E',
+        'GGA':'G', 'GGC':'G', 'GGG':'G', 'GGT':'G',
+        'TCA':'S', 'TCC':'S', 'TCG':'S', 'TCT':'S',
+        'TTC':'F', 'TTT':'F', 'TTA':'L', 'TTG':'L',
+        'TAC':'Y', 'TAT':'Y', 'TAA':'_', 'TAG':'_', 'TGA':'_'
+    }
+    return ''.join(codon_table.get(dna_sequence[i:i+3], '?') for i in range(0, len(dna_sequence) - 2, 3))
+
+def logistic_growth(y, r, K):
+    return r * y * (1 - y / K)
+
+def generate_logistic_growth(K=1000, r=0.1, y0=10, time_max=100, random_lag=10, random_exp=20):
+    import random
+    import pandas as pd
+    
+    lag_phase = random.randint(0, random_lag)
+    exp_phase = random.randint(0, random_exp)
+    t, y = 0, y0
+    data = []
+    
+    while t < time_max:
+        growth_rate = 0 if t < lag_phase else (r * y * (1 - y / K) if t < lag_phase + exp_phase else logistic_growth(y, r, K))
+        y += growth_rate
+        data.append({'Time': t, 'Population': y})
+        t += 1
+    
+    return pd.DataFrame(data)
+
+def time_to_reach_80_percent(K, r, y0=10, time_max=100):
+    y, t = y0, 0
+    while t < time_max:
+        y += logistic_growth(y, r, K)
+        if y >= 0.8 * K:
+            return t
+        t += 1
+    return None
+
+def hamming_distance(str1="visionarx", str2="Pharmacijournal"):
+    str1, str2 = str1.ljust(max(len(str1), len(str2))), str2.ljust(max(len(str1), len(str2)))
+    return sum(c1 != c2 for c1, c2 in zip(str1, str2))
